@@ -30,9 +30,24 @@
 ; SSA optimization passes
 
 (define (inline-constants ssa)
-  (filter (lambda (line) (equal? (first (second line)) "#")) ssa))
+  (let ((constants (filter (lambda (line) (equal? (third line)"#")) ssa)))
+    (rename-ssa ssa (map (lambda (line)
+                           (list (list "%" (second line)) (list "#" (fourth line))))
+                         constants))))
+
+(define (rename-ssa ssa substitutions)
+  (if (= (length substitutions) 0)
+    ssa
+    (rename-ssa (rename-single ssa (first substitutions)) (rest substitutions))))
+
+(define (rename-single ssa sub)
+  (map (lambda (line) 
+         (map (lambda (phrase)
+                (if (equal? phrase (first sub)) (second sub) phrase))
+              line))
+       ssa))
 
 ; test ssa generation
 ; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
 (let ((ssa (first (generate-ssa '("if" ("=" 1 2) ("mc" ("move" 10)) ("mc" ("move" 5))) '() 0))))
-  ssa)
+  (pretty-print (inline-constants ssa)))
