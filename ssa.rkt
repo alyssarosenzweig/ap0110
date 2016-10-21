@@ -17,7 +17,7 @@
 
 (define (generate-ssa-arguments lst src base out)
   (if (= (length lst) 0)
-    (list src base out)
+    (list src base (reverse out))
     (let ((ssa (generate-ssa (first lst) src base)))
       (let ((nsrc (first ssa))
             (nbase (second ssa)))
