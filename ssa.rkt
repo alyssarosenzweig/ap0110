@@ -27,6 +27,12 @@
             (nbase (second ssa)))
       (generate-ssa-arguments (rest lst) nsrc nbase (cons (list "%" (- nbase 1)) out))))))
 
+; SSA optimization passes
+
+(define (inline-constants ssa)
+  (filter (lambda (line) (equal? (first (second line)) "#")) ssa))
+
 ; test ssa generation
 ; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
-(pretty-print (first (generate-ssa '("if" ("=" 1 2) (("move" 10)) (("move" 5))) '() 0)))
+(let ((ssa (first (generate-ssa '("if" ("=" 1 2) (("move" 10)) (("move" 5))) '() 0))))
+  (inline-constants ssa))
