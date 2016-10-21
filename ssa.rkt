@@ -29,7 +29,13 @@
 
 ; SSA optimization passes
 
-(define (propogate-constants ssa)
+(define (fold-propagate-ssa ssa)
+  (let ((next-ssa (fold-constants (propagate-constants ssa))))
+    (if (equal? ssa next-ssa)
+      ssa
+      (fold-propagate-ssa next-ssa))))
+
+(define (propagate-constants ssa)
   (let ((constants (filter (lambda (line) (equal? (third line)"#")) ssa)))
     (substitute-ssa ssa (map (lambda (line)
                                (list (list "%" (second line)) (list "#" (fourth line))))
@@ -41,6 +47,8 @@
 (define (fold-line line)
   (cond ((and (equal? (third line) "=") (equal? (first (fourth line)) "#") (equal? (first (fifth line)) "#"))
           (append (take line 2) (list "#" (equal? (second (fourth line)) (second (fifth line))))))
+        ((and (equal? (third line) "if") (equal? (first (fourth line)) "#"))
+         (append (take line 2) (if (second (fourth line)) (fifth line) (sixth line))))
          (else line)))
 
 (define (substitute-ssa ssa subs)
@@ -68,4 +76,4 @@
 (let* ((out (generate-ssa '("if" ("=" 1 2) ("chain" ("turn" 1) ("move" 10)) ("chain" ("move" 5))) '() 0))
        (ssa (first out))
        (top (- (second out) 1)))
-  (pretty-print (remove-dead-ssa (fold-constants (propogate-constants ssa)) top)))
+  (pretty-print (fold-propagate-ssa ssa)))
