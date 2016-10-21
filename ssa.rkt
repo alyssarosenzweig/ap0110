@@ -63,7 +63,7 @@
 
 ; test ssa generation
 ; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
-(let* ((out (generate-ssa '("if" ("=" 1 2) ("mc" ("turn" 1) ("move" 10)) ("mc" ("move" 5))) '() 0))
+(let* ((out (generate-ssa '("if" ("=" 1 2) ("chain" ("turn" 1) ("move" 10)) ("chain" ("move" 5))) '() 0))
        (ssa (first out))
        (top (- (second out) 1)))
   (pretty-print (remove-dead-ssa (inline-constants ssa) top)))
