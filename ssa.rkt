@@ -6,21 +6,22 @@
         ((string? expr) (generate-ssa-immediate expr src base))))
 
 (define (generate-ssa-immediate expr src base)
-  (list (cons (list "=" base expr) src) (+ base 1)))
+  (list (cons (list "=" base (list "#" expr)) src) (+ base 1)))
 
 (define (generate-ssa-list expr src base)
-  (let ((arguments (generate-ssa-arguments (rest expr) src base)))
+  (let ((arguments (generate-ssa-arguments (rest expr) src base '())))
     (let ((nsrc (first arguments))
-          (nbase (second arguments)))
-      (list (cons (list "=" nbase expr) nsrc) (+ nbase 1)))))
+          (nbase (second arguments))
+          (args (third arguments)))
+      (list (cons (list "=" nbase (cons (first expr) args)) nsrc) (+ nbase 1)))))
 
-(define (generate-ssa-arguments lst src base)
+(define (generate-ssa-arguments lst src base out)
   (if (= (length lst) 0)
-    (list src base)
-    (let ((next (generate-ssa-arguments (rest lst) src base)))
-      (let ((nsrc (first next))
-            (nbase (second next)))
-        (generate-ssa (first lst) nsrc nbase)))))
+    (list src base out)
+    (let ((ssa (generate-ssa (first lst) src base)))
+      (let ((nsrc (first ssa))
+            (nbase (second ssa)))
+      (generate-ssa-arguments (rest lst) nsrc nbase (cons (list "%" (- nbase 1)) out))))))
 
 ; test ssa generation
-(generate-ssa '("move" ("+" 1 2)) '() 0)
+(pretty-print (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0))
