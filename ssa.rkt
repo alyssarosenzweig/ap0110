@@ -31,9 +31,7 @@
 
 (define (fold-propagate-ssa ssa)
   (let ((next-ssa (map fold-line (propagate-constants ssa))))
-    (if (equal? ssa next-ssa)
-      ssa
-      (fold-propagate-ssa next-ssa))))
+    (if (equal? ssa next-ssa) ssa (fold-propagate-ssa next-ssa))))
 
 (define (propagate-constants ssa)
   (let ((constants (filter (lambda (line) (equal? (third line)"#")) ssa)))
