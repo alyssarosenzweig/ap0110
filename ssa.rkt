@@ -29,11 +29,15 @@
 
 ; SSA optimization passes
 
+; inline constants -- not necessarily equivalent to folding
+
 (define (inline-constants ssa)
   (let ((constants (filter (lambda (line) (equal? (third line)"#")) ssa)))
     (rename-ssa ssa (map (lambda (line)
                            (list (list "%" (second line)) (list "#" (fourth line))))
                          constants))))
+
+; does not actually rename them, but just substitute definitions (more generic)
 
 (define (rename-ssa ssa substitutions)
   (if (= (length substitutions) 0)
@@ -47,7 +51,19 @@
               line))
        ssa))
 
+(define (reference? ssa)
+  (equal? (first ssa) "%"))
+
+(define (rest3 lst) (rest (rest (rest lst))))
+
+(define (remove-dead-ssa ssa top)
+  (let* ((references (map second (remove-duplicates (filter reference? (filter list? (append-map rest3 ssa))))))
+         (relevant (cons top references)))
+    (filter (lambda (line) (not (not (member (second line) relevant)))) ssa)))
+
 ; test ssa generation
 ; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
-(let ((ssa (first (generate-ssa '("if" ("=" 1 2) ("mc" ("move" 10)) ("mc" ("move" 5))) '() 0))))
-  (pretty-print (inline-constants ssa)))
+(let* ((out (generate-ssa '("if" ("=" 1 2) ("mc" ("move" 10)) ("mc" ("move" 5))) '() 0))
+       (ssa (first out))
+       (top (- (second out) 1)))
+  (pretty-print (remove-dead-ssa (inline-constants ssa) top)))
