@@ -1,5 +1,9 @@
 #lang racket
 
+; SSA emission
+; the ap0110 compiler internally emits monads
+; it's just easier this way :-)
+
 (define (generate-ssa expr src base)
   (cond ((list? expr) (generate-ssa-list expr src base))
         ((number? expr) (generate-ssa-immediate expr src base))
@@ -24,4 +28,5 @@
       (generate-ssa-arguments (rest lst) nsrc nbase (cons (list "%" (- nbase 1)) out))))))
 
 ; test ssa generation
-(pretty-print (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0))
+; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
+(pretty-print (first (generate-ssa '("if" ("=" 1 2) (("move" 10)) (("move" 5))) '() 0)))
