@@ -55,8 +55,8 @@
 (define (rest3 lst) (rest (rest (rest lst))))
 
 (define (remove-dead-ssa ssa top)
-  (let* ((references (map second (remove-duplicates (filter reference? (filter list? (append-map rest3 ssa))))))
-         (relevant (cons top references)))
+  (let* ((refs (map second (remove-duplicates (filter reference? (filter list? (append-map rest3 ssa))))))
+         (relevant (cons top refs)))
     (filter (lambda (line) (not (not (member (second line) relevant)))) ssa)))
 
 ; test ssa generation
