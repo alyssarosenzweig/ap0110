@@ -30,7 +30,7 @@
 ; SSA optimization passes
 
 (define (fold-propagate-ssa ssa)
-  (let ((next-ssa (fold-constants (propagate-constants ssa))))
+  (let ((next-ssa (map fold-line (propagate-constants ssa))))
     (if (equal? ssa next-ssa)
       ssa
       (fold-propagate-ssa next-ssa))))
@@ -40,9 +40,6 @@
     (substitute-ssa ssa (map (lambda (line)
                                (list (list "%" (second line)) (list "#" (fourth line))))
                              constants))))
-
-(define (fold-constants ssa)
-  (map fold-line ssa))
 
 (define (fold-line line)
   (cond ((and (equal? (third line) "=") (equal? (first (fourth line)) "#") (equal? (first (fifth line)) "#"))
