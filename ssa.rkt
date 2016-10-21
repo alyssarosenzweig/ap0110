@@ -1,9 +1,5 @@
 #lang racket
 
-; SSA emission
-; the ap0110 compiler internally emits monads
-; it's just easier this way :-)
-
 (define (generate-ssa expr src base)
   (cond ((list? expr) (generate-ssa-list expr src base))
         ((number? expr) (generate-ssa-immediate expr src base))
@@ -27,12 +23,4 @@
             (nbase (second ssa)))
       (generate-ssa-arguments (rest lst) nsrc nbase (cons (list "%" (- nbase 1)) out))))))
 
-; SSA optimization passes
-
-; test ssa generation
-; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
-(require "ssa-optimization.rkt")
-(let* ((out (generate-ssa '("if" ("=" 1 2) ("chain" ("turn" 1) ("move" 10)) ("chain" ("move" 5))) '() 0))
-       (ssa (first out))
-       (top (- (second out) 1)))
-  (pretty-print (remove-dead-pass (fold-propagate-pass ssa) top)))
+(provide generate-ssa)
