@@ -29,15 +29,21 @@
 
 ; SSA optimization passes
 
-; inline constants -- not necessarily equivalent to folding
-
-(define (inline-constants ssa)
+(define (propogate-constants ssa)
   (let ((constants (filter (lambda (line) (equal? (third line)"#")) ssa)))
-    (rename-ssa ssa (map (lambda (line)
-                           (list (list "%" (second line)) (list "#" (fourth line))))
-                         constants))))
+    (substitute-ssa ssa (map (lambda (line)
+                               (list (list "%" (second line)) (list "#" (fourth line))))
+                             constants))))
 
-(define (subtitute-ssa ssa subs)
+(define (fold-constants ssa)
+  (map fold-line ssa))
+
+(define (fold-line line)
+  (cond ((and (equal? (third line) "=") (equal? (first (fourth line)) "#") (equal? (first (fifth line)) "#"))
+          (append (take line 2) (list "#" (equal? (second (fourth line)) (second (fifth line))))))
+         (else line)))
+
+(define (substitute-ssa ssa subs)
   (if (= (length subs) 0)
     ssa
     (substitute-ssa (substitute-single ssa (first subs)) (rest subs))))
@@ -52,10 +58,8 @@
 (define (reference? ssa)
   (equal? (first ssa) "%"))
 
-(define (rest3 lst) (rest (rest (rest lst))))
-
 (define (remove-dead-ssa ssa top)
-  (let* ((refs (map second (remove-duplicates (filter reference? (filter list? (append-map rest3 ssa))))))
+  (let* ((refs (map second (remove-duplicates (filter reference? (filter list? (append-map cdddr ssa))))))
          (relevant (cons top refs)))
     (filter (lambda (line) (not (not (member (second line) relevant)))) ssa)))
 
@@ -64,4 +68,4 @@
 (let* ((out (generate-ssa '("if" ("=" 1 2) ("chain" ("turn" 1) ("move" 10)) ("chain" ("move" 5))) '() 0))
        (ssa (first out))
        (top (- (second out) 1)))
-  (pretty-print (remove-dead-ssa (inline-constants ssa) top)))
+  (pretty-print (remove-dead-ssa (fold-constants (propogate-constants ssa)) top)))
