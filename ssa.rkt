@@ -37,14 +37,12 @@
                            (list (list "%" (second line)) (list "#" (fourth line))))
                          constants))))
 
-; does not actually rename them, but just substitute definitions (more generic)
-
-(define (rename-ssa ssa substitutions)
-  (if (= (length substitutions) 0)
+(define (subtitute-ssa ssa subs)
+  (if (= (length subs) 0)
     ssa
-    (rename-ssa (rename-single ssa (first substitutions)) (rest substitutions))))
+    (substitute-ssa (substitute-single ssa (first subs)) (rest subs))))
 
-(define (rename-single ssa sub)
+(define (substitute-single ssa sub)
   (map (lambda (line) 
          (map (lambda (phrase)
                 (if (equal? phrase (first sub)) (second sub) phrase))
