@@ -10,14 +10,14 @@
         ((string? expr) (generate-ssa-immediate expr src base))))
 
 (define (generate-ssa-immediate expr src base)
-  (list (cons (list "=" base (list "#" expr)) src) (+ base 1)))
+  (list (cons (list "=" base "#" expr) src) (+ base 1)))
 
 (define (generate-ssa-list expr src base)
   (let ((arguments (generate-ssa-arguments (rest expr) src base '())))
     (let ((nsrc (first arguments))
           (nbase (second arguments))
           (args (third arguments)))
-      (list (cons (list "=" nbase (cons (first expr) args)) nsrc) (+ nbase 1)))))
+      (list (cons (append (list "=" nbase (first expr)) args) nsrc) (+ nbase 1)))))
 
 (define (generate-ssa-arguments lst src base out)
   (if (= (length lst) 0)
@@ -34,5 +34,5 @@
 
 ; test ssa generation
 ; (pretty-print (first (generate-ssa '("goto" ("+" 1 2) ("*" 2 3)) '() 0)))
-(let ((ssa (first (generate-ssa '("if" ("=" 1 2) (("move" 10)) (("move" 5))) '() 0))))
-  (inline-constants ssa))
+(let ((ssa (first (generate-ssa '("if" ("=" 1 2) ("mc" ("move" 10)) ("mc" ("move" 5))) '() 0))))
+  ssa)
