@@ -59,6 +59,11 @@
                 (lambda (y x)
                   (get-coefficient (coefficient x types casts) (first (list-ref asserts y))))))
 
+(define (solution->hash solution types casts)
+  (make-hash (map (lambda (val ind) (cons (coefficient ind types casts) val))
+                  (matrix->list solution)
+                  (range (matrix-num-rows solution)))))
+
 (define (assert-solve asserts)
   (let ((types (prepare-matlist asserts (lambda (p) (equal? (first p) "%"))))
         (casts (prepare-matlist asserts (lambda (p) (equal? (first p) "K")))))
@@ -69,7 +74,7 @@
       (pretty-print casts)
       (pretty-print mat)
       (pretty-print rhs)
-      (matrix-solve mat rhs))))
+      (solution->hash (matrix-solve mat rhs) types casts))))
 
 (define (type-ssa ssa)
   (assert-solve (assert-ssa ssa)))
