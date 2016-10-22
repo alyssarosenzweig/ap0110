@@ -5,7 +5,7 @@
 (require "typer.rkt")
 
 ;(let* ((out (generate-ssa '("if" ("=" 1 2) ("chain" ("turn" 1) ("move" 10)) ("chain" ("move" 5))) '() 0))
-(let* ((out (generate-ssa '("+" "12" 1) '() 0))
+(let* ((out (generate-ssa '("-" ("+" "12" 1) 2) '() 0))
         (ssa (first out))
         (top (- (second out) 1)))
   (pretty-print ssa)

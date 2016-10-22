@@ -32,7 +32,10 @@
 
 (define assertions
   (hash "#" assert-immediate
+
         "+" assert-arithm
+        "-" assert-arithm
+        "*" assert-arithm
 ))
 
 (define (assert-ssa ssa)
@@ -69,11 +72,6 @@
         (casts (prepare-matlist asserts (lambda (p) (equal? (first p) "K")))))
     (let ((mat (prepare-matrix asserts types casts))
           (rhs (->col-matrix (map second asserts))))
-      (pretty-print asserts)
-      (pretty-print types)
-      (pretty-print casts)
-      (pretty-print mat)
-      (pretty-print rhs)
       (solution->hash (matrix-solve mat rhs) types casts))))
 
 (define (type-ssa ssa)
