@@ -56,7 +56,7 @@
 
 (define (prepare-matrix asserts types casts)
   (build-matrix (length asserts) (+ (length types) (length casts))
-                (lambda (x y)
+                (lambda (y x)
                   (get-coefficient (coefficient x types casts) (first (list-ref asserts y))))))
 
 (define (assert-solve asserts)
@@ -64,6 +64,7 @@
         (casts (prepare-matlist asserts (lambda (p) (equal? (first p) "K")))))
     (let ((mat (prepare-matrix asserts types casts))
           (rhs (->col-matrix (map second asserts))))
+      (pretty-print asserts)
       (pretty-print types)
       (pretty-print casts)
       (pretty-print mat)
