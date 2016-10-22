@@ -42,10 +42,28 @@
   (remove-duplicates
     (append-map (lambda (ln) (map second (filter p (filter list? (first ln))))) asserts)))
 
+(define (coefficient c types casts)
+  (if (>= c (length types))
+    (list "K" (list-ref casts (- c (length types))))
+    (list "%" (list-ref types c))))
+
+(define (get-coefficient var line)
+  (if (< (length line) 2)
+    0
+    (if (equal? (second line) var)
+      (first line)
+      (get-coefficient var (cddr line)))))
+
+(define (prepare-matrix asserts types casts)
+  (build-matrix (length asserts) (+ (length types) (length casts))
+                (lambda (x y)
+                  (get-coefficient (coefficient x types casts) (first (list-ref asserts y))))))
+
 (define (assert-solve asserts)
   (let ((types (prepare-matlist asserts (lambda (p) (equal? (first p) "%"))))
         (casts (prepare-matlist asserts (lambda (p) (equal? (first p) "K")))))
-    casts))
+    (let ((mat (prepare-matrix asserts types casts)))
+      mat)))
 
 (define (type-ssa ssa)
   (assert-solve (assert-ssa ssa)))
